@@ -8,8 +8,9 @@ try:
 except ImportError:
 	__version__ = ':nya_confused:' # :nocov:
 
-from .assets  import init_asstes
-from .autodoc import register_documenters
+from .assets      import init_asstes
+from .documenters import register_documenters
+
 
 __all__ = (
 	'setup',
@@ -39,10 +40,8 @@ def setup(app):
 	for k, (d, r) in Config._config_values.items():
 		app.add_config_value(k, d, r)
 
-
 	init_asstes(app)
 	register_documenters(app)
-
 
 	return ext
 
