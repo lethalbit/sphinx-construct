@@ -45,6 +45,8 @@ class SubconstructDocumenter(Documenter):
 			construct.Flag        : self._empty_handler,
 			construct.FormatField : self._formatfield_handler,
 			construct.Switch      : self._switch_handler,
+			construct.Struct      : self._struct_handler,
+			construct.Pass        : self._empty_handler,
 		}
 
 	def __del__(self):
@@ -152,7 +154,7 @@ class SubconstructDocumenter(Documenter):
 
 	# Unwrap the construct.core.Transformed subcon
 	def _transformed_handler(self, obj, _ = None):
-		self._recuse(obj)
+		self._recuse(obj.subcon)
 
 	def _numeric_handler(self, obj, _ = None):
 		signedness = 'Signed' if obj.signed else 'Unsigned'
@@ -197,16 +199,30 @@ class SubconstructDocumenter(Documenter):
 		key = _recompose_keyfunc(obj.keyfunc)
 
 		for k, v in obj.cases.items():
-			self.append(f'.. py:attribute:: {k}')
+			self.append(f'.. py:attribute:: {self._typename(v)}')
 			self.append(f'   :type: {self._valname(v)}')
-			self.append(f'   :value: {self._typename(v)}')
-
+			self.append(f'   :value: {k}')
+			self.append( '   :noindex:')
 			self.append()
+			self._recuse(v)
 
 
 		if hasattr(obj, 'docs'):
 			self.append(obj.docs)
 			self.append()
+
+	def _struct_handler(self, obj, _ = None):
+			for s in obj.subcons:
+				self.append(f'.. py:attribute:: {self._typename(s)}')
+				self.append(f'   :type: {self._valname(s)}')
+				self.append( '   :noindex:')
+				self.append()
+				self._recuse(s)
+
+			if hasattr(obj, 'docs'):
+				self.append(obj.docs)
+				self.append()
+
 
 	# The default handler for things we miss
 	def _default_handler(self, obj, _ = None):
@@ -224,7 +240,7 @@ class SubconstructDocumenter(Documenter):
 			self.append(obj.docs)
 			self.append()
 
-		self._recuse(obj)
+		# self._recuse(obj)
 
 
 	# -- Sphinx Documenter boilerplate bits -- #
