@@ -37,16 +37,16 @@ class SubconstructDocumenter(Documenter):
 		super().__init__(*args, **kwargs)
 
 		self._subcon_handlers = {
-			construct.Enum        : self._enum_handler,
-			construct.Renamed     : self._renamed_handler,
-			construct.Transformed : self._transformed_handler,
-			construct.BitsInteger : self._numeric_handler,
-			construct.BytesInteger: self._numeric_handler,
-			construct.Flag        : self._empty_handler,
-			construct.FormatField : self._formatfield_handler,
-			construct.Switch      : self._switch_handler,
-			construct.Struct      : self._struct_handler,
-			construct.Pass        : self._empty_handler,
+			construct.Enum          : self._enum_handler,
+			construct.Renamed       : self._renamed_handler,
+			construct.Transformed   : self._transformed_handler,
+			construct.BitsInteger   : self._numeric_handler,
+			construct.BytesInteger  : self._numeric_handler,
+			construct.Flag.__class__: self._empty_handler,
+			construct.FormatField   : self._formatfield_handler,
+			construct.Switch        : self._switch_handler,
+			construct.Struct        : self._struct_handler,
+			construct.Pass.__class__: self._empty_handler,
 		}
 
 	def __del__(self):
