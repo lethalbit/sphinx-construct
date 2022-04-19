@@ -27,13 +27,7 @@ class SubconstructDocumenter(Documenter):
 	titles_allowed   = True
 	_subcon_handlers = {}
 
-	def add_line(self, l, s, *ln):
-		super().add_line(l, s, *ln)
-
-		self._rst.append(l)
-
 	def __init__(self, *args, **kwargs):
-		self._rst = []
 		super().__init__(*args, **kwargs)
 
 		self._subcon_handlers = {
@@ -48,10 +42,6 @@ class SubconstructDocumenter(Documenter):
 			construct.Struct        : self._struct_handler,
 			construct.Pass.__class__: self._empty_handler,
 		}
-
-	def __del__(self):
-		with open(f'{self.object.name}_rst_dump.rst'.replace('/', '_').replace(' ', '_'), 'w') as f:
-			f.write('\n'.join(self._rst))
 
 	def _documented_instance(self, obj):
 		if obj in _documented_subcon_instances:
