@@ -138,7 +138,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 				self.append()
 				self._recuse(obj)
 			else:
-				self.append(f'`See: "{obj.name}" <{self._mk_tgt_name(obj)}>`_')
+				self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
 				self.append()
 
 
