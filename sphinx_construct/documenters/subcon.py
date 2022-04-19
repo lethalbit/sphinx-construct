@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 from sphinx.util        import logging
-from sphinx.ext.autodoc import Documenter
+from sphinx.ext.autodoc import ModuleLevelDocumenter
 import construct
 
 from ..consts           import DOMAIN, FIELD_ENDAIN, FIELD_SPEC
@@ -17,13 +17,12 @@ __all__ = (
 
 _documented_subcon_instances = []
 
-class SubconstructDocumenter(Documenter):
+class SubconstructDocumenter(ModuleLevelDocumenter):
 	# domain         = DOMAIN
 	objtype          = 'subconstruct'
-	directivetype    = Documenter.objtype
 	directivetype    = 'attribute'
-	priority         = Documenter.priority + 100
-	option_spec      = dict(Documenter.option_spec)
+	priority         = ModuleLevelDocumenter.priority + 100
+	option_spec      = dict(ModuleLevelDocumenter.option_spec)
 	titles_allowed   = True
 	_subcon_handlers = {}
 
@@ -232,7 +231,6 @@ class SubconstructDocumenter(Documenter):
 
 		# self._recuse(obj)
 
-
 	# -- Sphinx Documenter boilerplate bits -- #
 
 	@classmethod
@@ -247,7 +245,5 @@ class SubconstructDocumenter(Documenter):
 		super().add_content(content, no_docstring)
 		self._subcon_handlers.get(type(self.object), self._default_handler)(self.object)
 
-	def resolve_name(self, modname, parents, path, base):
-		return modname, parents + [base]
-
-
+	def get_doc(self, ignore: int = None):
+		pass
