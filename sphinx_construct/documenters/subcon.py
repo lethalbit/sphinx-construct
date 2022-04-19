@@ -40,6 +40,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			construct.Switch        : self._switch_handler,
 			construct.Struct        : self._struct_handler,
 			construct.Pass.__class__: self._empty_handler,
+			construct.Const         : self._const_handler,
 		}
 
 	def _documented_instance(self, obj):
@@ -212,6 +213,10 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 				self.append(obj.docs)
 				self.append()
 
+	def _const_handler(self, obj : construct.Const, _ = None):
+		self.append(f':value: {obj.value}')
+		subcon = obj.subcon
+		self._subcon_handlers.get(type(subcon), self._default_handler)(subcon)
 
 	# The default handler for things we miss
 	def _default_handler(self, obj, _ = None):
