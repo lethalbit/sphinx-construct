@@ -50,6 +50,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			construct.Pass.__class__: self._empty_handler,
 			construct.Const         : self._const_handler,
 			construct.Padded        : self._padded_handler,
+			construct.Rebuild       : self._rebuild_handler,
 		}
 
 	def _documented_instance(self, obj):
@@ -266,6 +267,14 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self.append()
 		self.append(f'Data block padded to {obj.length} bytes')
 		self._recuse(obj)
+		if hasattr(obj, 'docs'):
+			self.append()
+			self.append(obj.docs)
+
+	def _rebuild_handler(self, obj : construct.Rebuild):
+		self.append()
+		self.append(f'Runtime rebuilt constant')
+		self._recuse(obj, indent = False)
 		if hasattr(obj, 'docs'):
 			self.append()
 			self.append(obj.docs)
