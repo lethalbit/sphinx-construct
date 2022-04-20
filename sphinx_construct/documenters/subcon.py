@@ -39,6 +39,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			construct.Enum          : self._enum_handler,
 			construct.Renamed       : self._renamed_handler,
 			construct.Transformed   : self._transformed_handler,
+			construct.Restreamed    : self._restreamed_handler,
 			construct.BitsInteger   : self._numeric_handler,
 			construct.BytesInteger  : self._numeric_handler,
 			construct.Flag.__class__: self._empty_handler,
@@ -66,6 +67,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		containers = (
 			construct.Renamed,
 			construct.Transformed,
+			construct.Restreamed,
 		)
 
 		if isinstance(obj, containers):
@@ -156,6 +158,16 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		if obj.decodefunc == construct.bytes2bits:
 			self.size_mode = SizeMode.BITS
 		elif obj.decodefunc == construct.bits2bytes:
+			self.size_mode = SizeMode.BYTES
+		self._recuse(obj, indent = False)
+		self.size_mode = size_mode
+
+	# Unwrap the bits/bytes mode change construct.core.Restreamed subcon
+	def _restreamed_handler(self, obj : construct.Restreamed):
+		size_mode = self.size_mode
+		if obj.decoderunit == 8:
+			self.size_mode = SizeMode.BITS
+		elif obj.decoderunit == 1:
 			self.size_mode = SizeMode.BYTES
 		self._recuse(obj, indent = False)
 		self.size_mode = size_mode
