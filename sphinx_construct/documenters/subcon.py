@@ -146,8 +146,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 
 	# Unwrap the construct.core.Transformed subcon
-	def _transformed_handler(self, obj, _ = None):
-		self._recuse(obj.subcon)
+	def _transformed_handler(self, obj):
+		self._recuse(obj, indent = False)
 
 	def _numeric_handler(self, obj):
 		signedness = 'Signed' if obj.signed else 'Unsigned'
