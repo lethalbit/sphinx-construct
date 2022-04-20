@@ -37,6 +37,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self.size_mode = SizeMode.BYTES
 		self._subcon_handlers = {
 			construct.Enum          : self._enum_handler,
+			construct.FlagsEnum     : self._flags_enum_handler,
 			construct.Renamed       : self._renamed_handler,
 			construct.Transformed   : self._transformed_handler,
 			construct.Restreamed    : self._restreamed_handler,
@@ -127,6 +128,30 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			return f'0{base}{value:0{size}{base}}'
 
 		for v, k in obj.ksymapping.items():
+			self.append()
+			self.append(f'.. py:attribute:: {str(self.name).replace("::", ".")}.{k}')
+			self.append(f'   :type: {self._typename(obj.subcon)}<{size}>')
+			self.append(f'   :value: {_val_to_str(v)}')
+			self.append( '   :noindex:')
+
+		if hasattr(obj, 'docs'):
+			self.append()
+			self.append(obj.docs)
+
+	def _flags_enum_handler(self, obj):
+		size   = obj.subcon.sizeof()
+		if self.size_mode == SizeMode.BYTES:
+			base = 'x'
+			size = size * 2
+		else:
+			do_hex = (size & 3) == 0
+			base   = 'x' if do_hex else 'b'
+			size   = (size >> 2) if do_hex else size
+
+		def _val_to_str(value):
+			return f'0x{value:0{size}{base}}'
+
+		for v, k in obj.reverseflags.items():
 			self.append()
 			self.append(f'.. py:attribute:: {str(self.name).replace("::", ".")}.{k}')
 			self.append(f'   :type: {self._typename(obj.subcon)}<{size}>')
