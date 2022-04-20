@@ -243,17 +243,16 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		key = _recompose_keyfunc(obj.keyfunc)
 
 		for k, v in obj.cases.items():
-			self.append(f'.. py:attribute:: {self._typename(v)}')
-			self.append(f'   :type: {self._valname(v)}')
-			self.append(f'   :value: {k}')
-			self.append( '   :noindex:')
 			self.append()
+			self.append(f'.. py:attribute:: {self.name}.{k}')
+			self.append(f'   :type: {self._typename(v)}')
+			self.append( '   :noindex:')
 			self._recuse(v)
-
 
 		if hasattr(obj, 'docs'):
 			self.append()
 			self.append(obj.docs)
+		_documented_subcon_instances[obj] = self.name
 
 	def _struct_handler(self, obj : construct.Struct):
 		self._recuse(obj, indent = False)
@@ -315,7 +314,13 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def add_content(self, content, no_docstring = False):
 		super().add_content(content, no_docstring)
-		self._recuse(self.object, indent = False)
+		name = self.name
+		self.name = f'{self.modname}.{self.format_name()}'
+		if isinstance(self.object, construct.Switch):
+			self._switch_handler(self.object)
+		else:
+			self._recuse(self.object, indent = False)
+		self.name = name
 
 	def get_doc(self, ignore: int = None):
 		pass
