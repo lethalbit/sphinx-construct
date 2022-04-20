@@ -91,7 +91,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def append(self, text = None):
 		if text is not None:
-			self.add_line(f'{self.indent}{text}', self.get_sourcename())
+			self.add_line(text, self.get_sourcename())
 		else:
 			self.add_line('', self.get_sourcename())
 
@@ -236,11 +236,13 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(obj.docs)
 
-	def _switch_handler(self, obj : construct.Switch):
-		def _recompose_keyfunc(func):
+	def _switch_handler(self, obj : construct.Switch, header : bool = True):
+		def _recompose_keyfunc(func : construct.Path):
 			return func
 
-		key = _recompose_keyfunc(obj.keyfunc)
+		if header:
+			key = _recompose_keyfunc(obj.keyfunc)
+			self.append(f':value: {key}')
 
 		for k, v in obj.cases.items():
 			self.append()
@@ -311,13 +313,15 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 	def add_directive_header(self, sig):
 		super().add_directive_header(sig)
 		self.append(f'   :type: {self._typename(self.object)}')
+		if isinstance(self.object, construct.Switch):
+			self.append(f'   :value: {self.object.keyfunc}')
 
 	def add_content(self, content, no_docstring = False):
 		super().add_content(content, no_docstring)
 		name = self.name
 		self.name = f'{self.modname}.{self.format_name()}'
 		if isinstance(self.object, construct.Switch):
-			self._switch_handler(self.object)
+			self._switch_handler(self.object, header = False)
 		else:
 			self._recuse(self.object, indent = False)
 		self.name = name
