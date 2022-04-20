@@ -16,7 +16,7 @@ __all__ = (
 	'SubconstructDocumenter',
 )
 
-_documented_subcon_instances = []
+_documented_subcon_instances = {}
 
 @unique
 class SizeMode(IntEnum):
@@ -78,15 +78,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		return obj.__class__.__name__
 
 	# Attempts to get the name of a value
-	def _valname(self, obj):
-		containers = (
-			construct.Renamed,
-		)
-
-		if isinstance(obj, containers):
-			return obj.name
-
-		return obj.name
+	def _valname(self, obj : construct.Construct):
+		return f'{self.name}.{obj.name}'
 
 	def append(self, text = None):
 		if text is not None:
@@ -100,6 +93,9 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		if indent:
 			old_indent = self.indent
 			self.indent = f'{old_indent}   '
+		if obj.name is not None:
+			name = self.name
+			self.name = f'{name}.{obj.name}'
 
 		if hasattr(obj, 'subcons'):
 			for sc in obj.subcons:
@@ -109,9 +105,11 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		elif hasattr(obj, 'subcon'):
 			self._subcon_handlers.get(type(obj.subcon), self._default_handler)(obj.subcon)
 
+		if obj.name is not None:
+			self.name = name
 		if indent:
 			self.indent = old_indent
-		_documented_subcon_instances.append(obj)
+		_documented_subcon_instances[obj] = self.name
 
 	# -- Type Handlers -- #
 
@@ -130,10 +128,9 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 		for v, k in obj.ksymapping.items():
 			self.append()
-			self.append(f'.. py:attribute:: {str(self.name).replace("::", ".")}.{k}')
+			self.append(f'.. py:attribute:: {self.name}.{k}')
 			self.append(f'   :type: {self._typename(obj.subcon)}<{size}>')
 			self.append(f'   :value: {_val_to_str(v)}')
-			self.append( '   :noindex:')
 
 		if hasattr(obj, 'docs'):
 			self.append()
@@ -154,10 +151,9 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 		for v, k in obj.reverseflags.items():
 			self.append()
-			self.append(f'.. py:attribute:: {str(self.name).replace("::", ".")}.{k}')
+			self.append(f'.. py:attribute:: {self.name}.{k}')
 			self.append(f'   :type: {self._typename(obj.subcon)}<{size}>')
 			self.append(f'   :value: {_val_to_str(v)}')
-			self.append( '   :noindex:')
 
 		if hasattr(obj, 'docs'):
 			self.append()
@@ -168,15 +164,14 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		if di is None:
 			self.append()
 			# self.append(f'.. _{self._mk_tgt_name(obj)}:')
-			self.append(f'.. py:attribute:: {obj.name}')
-			self.append(f'   :type: {self._typename(obj.subcon)} (Renamed)')
+			self.append(f'.. py:attribute:: {self._valname(obj)}')
+			self.append(f'   :type: {self._typename(obj.subcon)}')
 			if hasattr(obj.subcon, 'value'):
 				self.append(f'   :value: {obj.subcon.value}')
-			self.append( '   :noindex:')
 			self._recuse(obj)
 		else:
 			self.append()
-			self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
+			self.append(f'See: :py:attr:`{obj.name}<{_documented_subcon_instances[obj]}.{obj.name}>`')
 
 	# Unwrap the bits/bytes mode change construct.core.Transformed subcon
 	def _transformed_handler(self, obj : construct.Transformed):
@@ -303,7 +298,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def add_content(self, content, no_docstring = False):
 		super().add_content(content, no_docstring)
-		self._subcon_handlers.get(type(self.object), self._default_handler)(self.object)
+		self._recuse(self.object, indent = False)
 
 	def get_doc(self, ignore: int = None):
 		pass
