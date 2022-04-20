@@ -49,6 +49,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			construct.Struct        : self._struct_handler,
 			construct.Pass.__class__: self._empty_handler,
 			construct.Const         : self._const_handler,
+			construct.Padded        : self._padded_handler,
 		}
 
 	def _documented_instance(self, obj):
@@ -265,6 +266,14 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def _const_handler(self, obj : construct.Const):
 		self._recuse(obj, indent = False)
+
+	def _padded_handler(self, obj : construct.Padded):
+		self.append()
+		self.append(f'Data block padded to {obj.length} bytes')
+		self._recuse(obj)
+		if hasattr(obj, 'docs'):
+			self.append()
+			self.append(obj.docs)
 
 	# The default handler for things we miss
 	def _default_handler(self, obj):
