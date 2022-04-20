@@ -103,7 +103,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	# -- Type Handlers -- #
 
-	def _enum_handler(self, obj, _ = None):
+	def _enum_handler(self, obj):
 		size   = obj.subcon.sizeof()
 		do_hex = (size & 3) == 0
 		base   = 'x' if do_hex else 'b'
@@ -147,7 +147,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 	def _transformed_handler(self, obj, _ = None):
 		self._recuse(obj.subcon)
 
-	def _numeric_handler(self, obj, _ = None):
+	def _numeric_handler(self, obj):
 		signedness = 'Signed' if obj.signed else 'Unsigned'
 		if isinstance(obj, construct.BitsInteger):
 			unit = 'bit'
@@ -161,7 +161,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(obj.docs)
 
-	def _formatfield_handler(self, obj, _ = None):
+	def _formatfield_handler(self, obj):
 		endian = FIELD_ENDAIN[obj.fmtstr[0]]['endian']
 		specs  = list(map(lambda s: FIELD_SPEC[s], obj.fmtstr[1:]))
 
@@ -183,7 +183,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(obj.docs)
 
-	def _switch_handler(self, obj, _ = None):
+	def _switch_handler(self, obj : construct.Switch):
 		def _recompose_keyfunc(func):
 			return func
 
@@ -222,7 +222,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self._subcon_handlers.get(type(subcon), self._default_handler)(subcon)
 
 	# The default handler for things we miss
-	def _default_handler(self, obj, _ = None):
+	def _default_handler(self, obj):
 		log.warning(f'No specialized handling for {type(obj)}', color = 'yellow')
 		if hasattr(obj, 'docs'):
 			self.append()
@@ -232,7 +232,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	# Not quite the default handler, but an empty handler
 	# for type that don't have special parsing needs
-	def _empty_handler(self, obj, _ = None):
+	def _empty_handler(self, obj):
 		if hasattr(obj, 'docs'):
 			self.append()
 			self.append(obj.docs)
@@ -245,7 +245,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def add_directive_header(self, sig):
 		super().add_directive_header(sig)
-		self._subcon_handlers.get(type(self.object), self._default_handler)(self.object, True)
+		self.append(f'   :type: {self._typename(self.object)}')
 
 	def add_content(self, content, no_docstring = False):
 		super().add_content(content, no_docstring)
