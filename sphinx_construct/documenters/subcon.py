@@ -204,19 +204,16 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(obj.docs)
 
-	def _struct_handler(self, obj : construct.Struct, is_header = False):
-		if is_header:
-			self.append(f'   :type: {self._typename(obj)}')
-		else:
-			di = self._documented_instance(obj)
-			if di is None:
-				if hasattr(obj, 'docs'):
-					self.append(obj.docs)
-					self.append()
-				self._recuse(obj)
-			else:
-				self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
+	def _struct_handler(self, obj : construct.Struct):
+		di = self._documented_instance(obj)
+		if di is None:
+			self._recuse(obj, indent = False)
+
+			if hasattr(obj, 'docs'):
 				self.append()
+				self.append(obj.docs)
+		else:
+			self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
 
 	def _const_handler(self, obj : construct.Const, _ = None):
 		self.append(f':value: {obj.value}')
