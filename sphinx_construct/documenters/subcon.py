@@ -182,9 +182,9 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 	# Unwrap the bits/bytes mode change construct.core.Restreamed subcon
 	def _restreamed_handler(self, obj : construct.Restreamed):
 		size_mode = self.size_mode
-		if obj.decoderunit == 8:
+		if obj.decoder == construct.bytes2bits:
 			self.size_mode = SizeMode.BITS
-		elif obj.decoderunit == 1:
+		elif obj.decoder == construct.bits2bytes:
 			self.size_mode = SizeMode.BYTES
 		self._recuse(obj, indent = False)
 		self.size_mode = size_mode
