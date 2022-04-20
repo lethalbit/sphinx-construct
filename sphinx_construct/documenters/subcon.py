@@ -69,10 +69,21 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			construct.Restreamed,
 		)
 
-		if isinstance(obj, containers):
+		prefix = ''
+		while isinstance(obj, containers):
+			if (
+				(isinstance(obj, construct.Transformed) and obj.decodefunc == construct.bytes2bits) or
+				(isinstance(obj, construct.Restreamed) and obj.decoder == construct.bytes2bits)
+			):
+				prefix = 'Bit'
+			elif (
+				(isinstance(obj, construct.Transformed) and obj.decodefunc == construct.bits2bytes) or
+				(isinstance(obj, construct.Restreamed) and obj.decoder == construct.bits2bytes)
+			):
+				prefix = ''
 			obj = obj.subcon
 
-		return obj.__class__.__name__
+		return f'{prefix}{obj.__class__.__name__}'
 
 	# Attempts to get the name of a value
 	def _valname(self, obj : construct.Construct):
