@@ -210,10 +210,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		else:
 			self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
 
-	def _const_handler(self, obj : construct.Const, _ = None):
-		self.append(f':value: {obj.value}')
-		subcon = obj.subcon
-		self._subcon_handlers.get(type(subcon), self._default_handler)(subcon)
+	def _const_handler(self, obj : construct.Const):
+		self._recuse(obj, indent = False)
 
 	# The default handler for things we miss
 	def _default_handler(self, obj):
