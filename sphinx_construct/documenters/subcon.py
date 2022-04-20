@@ -2,6 +2,7 @@
 from sphinx.util        import logging
 from sphinx.ext.autodoc import ModuleLevelDocumenter
 from enum import IntEnum, unique, auto
+from typing import Union
 import construct
 
 from ..consts           import DOMAIN, FIELD_ENDAIN, FIELD_SPEC
@@ -188,7 +189,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self._recuse(obj, indent = False)
 		self.size_mode = size_mode
 
-	def _numeric_handler(self, obj):
+	def _numeric_handler(self, obj : Union[construct.BitsInteger,construct.BytesInteger]):
 		signedness = 'Signed' if obj.signed else 'Unsigned'
 		if isinstance(obj, construct.BitsInteger):
 			unit = 'bit'
@@ -202,7 +203,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(obj.docs)
 
-	def _formatfield_handler(self, obj):
+	def _formatfield_handler(self, obj : construct.FormatField):
 		endian = FIELD_ENDAIN[obj.fmtstr[0]]['endian']
 		specs  = list(map(lambda s: FIELD_SPEC[s], obj.fmtstr[1:]))
 
