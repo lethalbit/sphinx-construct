@@ -92,6 +92,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self.indent = f'{old_indent}   '
 		if hasattr(obj, 'subcons'):
 			for sc in obj.subcons:
+				self.append()
 				self._subcon_handlers.get(type(sc), self._default_handler)(sc)
 
 		elif hasattr(obj, 'subcon'):
@@ -111,16 +112,16 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		def _val_to_str(value):
 			return f'0{base}{value:0{size}{base}}'
 
-
 		for v, k in obj.ksymapping.items():
-			self.append(f'.. py:attribute:: {str(self.name).replace("::", ".")}.{k}')
-			self.append(f'   :type: {obj.subcon.__class__.__name__}<{size}>')
-			self.append(f'   :value: {_val_to_str(v)}')
 			self.append()
+			self.append(f'.. py:attribute:: {str(self.name).replace("::", ".")}.{k}')
+			self.append(f'   :type: {self._typename(obj.subcon)}<{size}>')
+			self.append(f'   :value: {_val_to_str(v)}')
+			self.append( '   :noindex:')
 
 		if hasattr(obj, 'docs'):
-			self.append(obj.docs)
 			self.append()
+			self.append(obj.docs)
 
 	def _renamed_handler(self, obj, is_header = False):
 		if is_header:
@@ -153,34 +154,34 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		elif isinstance(obj, construct.BytesInteger):
 			unit = 'byte'
 
-		self.append(f'{signedness} {obj.sizeof()} {unit} integer.')
 		self.append()
+		self.append(f'{signedness} {obj.sizeof()} {unit} integer.')
 
 		if hasattr(obj, 'docs'):
-			self.append(obj.docs)
 			self.append()
+			self.append(obj.docs)
 
 	def _formatfield_handler(self, obj, _ = None):
 		endian = FIELD_ENDAIN[obj.fmtstr[0]]['endian']
 		specs  = list(map(lambda s: FIELD_SPEC[s], obj.fmtstr[1:]))
 
+		self.append()
 		self.append(f'**Endian:** {endian!s}')
 		self.append()
 		self.append(f'**Size:** {obj.length}')
 		self.append()
 		self.append(f'**Underlying Types:**')
-		self.append()
 		for s in specs:
+			self.append()
 			self.append(f'  Type: {s["ptype"]}')
 			self.append()
 			self.append(f'  Size: {s["std_size"]}')
 			self.append()
 			self.append(f'  Sign: {s["signed"]!s}')
-			self.append()
 
 		if hasattr(obj, 'docs'):
-			self.append(obj.docs)
 			self.append()
+			self.append(obj.docs)
 
 	def _switch_handler(self, obj, _ = None):
 		def _recompose_keyfunc(func):
@@ -198,8 +199,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 
 		if hasattr(obj, 'docs'):
-			self.append(obj.docs)
 			self.append()
+			self.append(obj.docs)
 
 	def _struct_handler(self, obj : construct.Struct, is_header = False):
 		if is_header:
@@ -224,8 +225,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 	def _default_handler(self, obj, _ = None):
 		log.warning(f'No specialized handling for {type(obj)}', color = 'yellow')
 		if hasattr(obj, 'docs'):
-			self.append(obj.docs)
 			self.append()
+			self.append(obj.docs)
 
 		self._recuse(obj)
 
@@ -233,10 +234,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 	# for type that don't have special parsing needs
 	def _empty_handler(self, obj, _ = None):
 		if hasattr(obj, 'docs'):
-			self.append(obj.docs)
 			self.append()
-
-		# self._recuse(obj)
+			self.append(obj.docs)
 
 	# -- Sphinx Documenter boilerplate bits -- #
 
