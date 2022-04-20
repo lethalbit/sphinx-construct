@@ -99,7 +99,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		if obj in _documented_subcon_instances:
 			name = _documented_subcon_instances[obj]
 			self.append()
-			self.append(f'See: :py:attr:`{name}`')
+			self.append(f'   See: :py:attr:`{name}`')
 			return
 
 		if indent:
@@ -175,7 +175,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self.append()
 		# self.append(f'.. _{self._mk_tgt_name(obj)}:')
 		self.append(f'.. py:attribute:: {self._valname(obj)}')
-		self.append(f'   :type: {self._typename(obj.subcon)}')
+		self.append(f'   :type: {self._typename(obj)}')
 		if hasattr(obj.subcon, 'value'):
 			self.append(f'   :value: {obj.subcon.value}')
 		self._recuse(obj)
