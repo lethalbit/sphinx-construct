@@ -50,6 +50,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			construct.Const         : self._const_handler,
 			construct.Padded        : self._padded_handler,
 			construct.Rebuild       : self._rebuild_handler,
+			construct.GreedyRange   : self._greedy_range_handler,
 		}
 
 	def _sanitize_name(self, txt):
@@ -267,6 +268,12 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		if hasattr(obj, 'docs'):
 			self.append()
 			self.append(obj.docs)
+
+	def _greedy_range_handler(self, obj : construct.GreedyRange):
+		self.append()
+		self.append(f'.. py:attribute:: {self.name}.GreedyRange')
+		self.append(f'   :type: {self._typename(obj.subcon)}')
+		self._recuse(obj)
 
 	# The default handler for things we miss
 	def _default_handler(self, obj):
