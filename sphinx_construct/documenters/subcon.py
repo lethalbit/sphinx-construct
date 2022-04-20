@@ -30,7 +30,6 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 	priority         = ModuleLevelDocumenter.priority + 100
 	option_spec      = dict(ModuleLevelDocumenter.option_spec)
 	titles_allowed   = True
-	_subcon_handlers = {}
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -52,11 +51,6 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			construct.Padded        : self._padded_handler,
 			construct.Rebuild       : self._rebuild_handler,
 		}
-
-	def _documented_instance(self, obj):
-		if obj in _documented_subcon_instances:
-			return obj
-		return None
 
 	def _sanitize_name(self, txt):
 		tgt_chars = (' ', '.', '<', '>', ':')
@@ -165,18 +159,13 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append(obj.docs)
 
 	def _renamed_handler(self, obj : construct.Renamed):
-		di = self._documented_instance(obj)
-		if di is None:
-			self.append()
-			# self.append(f'.. _{self._mk_tgt_name(obj)}:')
-			self.append(f'.. py:attribute:: {self._valname(obj)}')
-			self.append(f'   :type: {self._typename(obj.subcon)}')
-			if hasattr(obj.subcon, 'value'):
-				self.append(f'   :value: {obj.subcon.value}')
-			self._recuse(obj)
-		else:
-			self.append()
-			self.append(f'See: :py:attr:`{obj.name}<{_documented_subcon_instances[obj]}.{obj.name}>`')
+		self.append()
+		# self.append(f'.. _{self._mk_tgt_name(obj)}:')
+		self.append(f'.. py:attribute:: {self._valname(obj)}')
+		self.append(f'   :type: {self._typename(obj.subcon)}')
+		if hasattr(obj.subcon, 'value'):
+			self.append(f'   :value: {obj.subcon.value}')
+		self._recuse(obj)
 
 	# Unwrap the bits/bytes mode change construct.core.Transformed subcon
 	def _transformed_handler(self, obj : construct.Transformed):
@@ -254,15 +243,11 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append(obj.docs)
 
 	def _struct_handler(self, obj : construct.Struct):
-		di = self._documented_instance(obj)
-		if di is None:
-			self._recuse(obj, indent = False)
+		self._recuse(obj, indent = False)
 
-			if hasattr(obj, 'docs'):
-				self.append()
-				self.append(obj.docs)
-		else:
-			self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
+		if hasattr(obj, 'docs'):
+			self.append()
+			self.append(obj.docs)
 
 	def _const_handler(self, obj : construct.Const):
 		self._recuse(obj, indent = False)
