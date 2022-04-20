@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 from sphinx.util        import logging
 from sphinx.ext.autodoc import ModuleLevelDocumenter
+from enum import IntEnum, unique, auto
 import construct
 
 from ..consts           import DOMAIN, FIELD_ENDAIN, FIELD_SPEC
@@ -17,6 +18,11 @@ __all__ = (
 
 _documented_subcon_instances = []
 
+@unique
+class SizeMode(IntEnum):
+	BYTES = auto()
+	BITS = auto()
+
 class SubconstructDocumenter(ModuleLevelDocumenter):
 	# domain         = DOMAIN
 	objtype          = 'subconstruct'
@@ -28,7 +34,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-
+		self.size_mode = SizeMode.BYTES
 		self._subcon_handlers = {
 			construct.Enum          : self._enum_handler,
 			construct.Renamed       : self._renamed_handler,
@@ -107,9 +113,13 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def _enum_handler(self, obj):
 		size   = obj.subcon.sizeof()
-		do_hex = (size & 3) == 0
-		base   = 'x' if do_hex else 'b'
-		size   = (size >> 2) if do_hex else size
+		if self.size_mode == SizeMode.BYTES:
+			base = 'x'
+			size = size * 2
+		else:
+			do_hex = (size & 3) == 0
+			base   = 'x' if do_hex else 'b'
+			size   = (size >> 2) if do_hex else size
 
 		def _val_to_str(value):
 			return f'0{base}{value:0{size}{base}}'
@@ -140,9 +150,15 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
 
-	# Unwrap the construct.core.Transformed subcon
-	def _transformed_handler(self, obj):
+	# Unwrap the bits/bytes mode change construct.core.Transformed subcon
+	def _transformed_handler(self, obj : construct.Transformed):
+		size_mode = self.size_mode
+		if obj.decodefunc == construct.bytes2bits:
+			self.size_mode = SizeMode.BITS
+		elif obj.decodefunc == construct.bits2bytes:
+			self.size_mode = SizeMode.BYTES
 		self._recuse(obj, indent = False)
+		self.size_mode = size_mode
 
 	def _numeric_handler(self, obj):
 		signedness = 'Signed' if obj.signed else 'Unsigned'
