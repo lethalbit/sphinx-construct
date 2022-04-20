@@ -125,25 +125,20 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(obj.docs)
 
-	def _renamed_handler(self, obj, is_header = False):
-		if is_header:
-			# self.append(f'.. py:attribute:: {obj.name}')
-			# self.append(f'   :module: {self.modname}')
-			self.append(f'   :type: {self._typename(obj.subcon)}')
+	def _renamed_handler(self, obj : construct.Renamed):
+		di = self._documented_instance(obj)
+		if di is None:
+			self.append()
+			# self.append(f'.. _{self._mk_tgt_name(obj)}:')
+			self.append(f'.. py:attribute:: {obj.name}')
+			self.append(f'   :type: {self._typename(obj.subcon)} (Renamed)')
+			if hasattr(obj.subcon, 'value'):
+				self.append(f'   :value: {obj.subcon.value}')
+			self.append( '   :noindex:')
+			self._recuse(obj)
 		else:
-			di = self._documented_instance(obj)
-			if di is None:
-				# self.append(f'.. _{self._mk_tgt_name(obj)}:')
-				self.append()
-				self.append(f'.. py:attribute:: {obj.name}')
-				self.append(f'   :type: {self._typename(obj.subcon)}')
-				self.append( '   :noindex:')
-				self.append()
-				self._recuse(obj)
-			else:
-				self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
-				self.append()
-
+			self.append()
+			self.append(f'See: :py:attr:`{obj.name}<{obj.name}>`')
 
 	# Unwrap the construct.core.Transformed subcon
 	def _transformed_handler(self, obj):
