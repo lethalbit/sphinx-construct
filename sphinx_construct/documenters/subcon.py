@@ -90,7 +90,11 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 
 	def _recuse(self, obj, indent : bool = True):
 		if obj in _documented_subcon_instances:
+			name = _documented_subcon_instances[obj]
+			self.append()
+			self.append(f'See: :py:attr:`{name}`')
 			return
+
 		if indent:
 			old_indent = self.indent
 			self.indent = f'{old_indent}   '
