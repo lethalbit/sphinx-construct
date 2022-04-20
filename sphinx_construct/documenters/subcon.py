@@ -84,12 +84,13 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		else:
 			self.add_line('', self.get_sourcename())
 
-	def _recuse(self, obj):
+	def _recuse(self, obj, indent : bool = True):
 		if obj in _documented_subcon_instances:
 			return
+		if indent:
+			old_indent = self.indent
+			self.indent = f'{old_indent}   '
 
-		old_indent = self.indent
-		self.indent = f'{old_indent}   '
 		if hasattr(obj, 'subcons'):
 			for sc in obj.subcons:
 				self.append()
@@ -98,7 +99,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		elif hasattr(obj, 'subcon'):
 			self._subcon_handlers.get(type(obj.subcon), self._default_handler)(obj.subcon)
 
-		self.indent = old_indent
+		if indent:
+			self.indent = old_indent
 		_documented_subcon_instances.append(obj)
 
 	# -- Type Handlers -- #
