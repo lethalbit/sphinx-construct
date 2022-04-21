@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 from sphinx.util        import logging
 from sphinx.ext.autodoc import ModuleLevelDocumenter
-from enum import IntEnum, unique, auto
-from typing import Union
+from enum               import IntEnum, unique, auto
+from typing             import Union
 import construct
 
 from ..consts           import DOMAIN, FIELD_ENDAIN, FIELD_SPEC
