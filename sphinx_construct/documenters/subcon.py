@@ -159,7 +159,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			size   = (size >> 2) if do_hex else size
 
 		def _val_to_str(value):
-			return f'0x{value:0{size}{base}}'
+			return f'0{base}{value:0{size}{base}}'
 
 		for v, k in obj.reverseflags.items():
 			self.append()
