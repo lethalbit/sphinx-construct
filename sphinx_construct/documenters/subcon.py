@@ -95,7 +95,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		else:
 			self.add_line('', self.get_sourcename())
 
-	def _recuse(self, obj, indent : bool = True):
+	def _recurse(self, obj, indent : bool = True):
 		if obj in _documented_subcon_instances:
 			name = _documented_subcon_instances[obj]
 			self.append()
@@ -178,7 +178,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self.append(f'   :type: {self._typename(obj)}')
 		if hasattr(obj.subcon, 'value'):
 			self.append(f'   :value: {obj.subcon.value}')
-		self._recuse(obj)
+		self._recurse(obj)
 
 	# Unwrap the bits/bytes mode change construct.core.Transformed subcon
 	def _transformed_handler(self, obj : construct.Transformed):
@@ -187,7 +187,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.size_mode = SizeMode.BITS
 		elif obj.decodefunc == construct.bits2bytes:
 			self.size_mode = SizeMode.BYTES
-		self._recuse(obj, indent = False)
+		self._recurse(obj, indent = False)
 		self.size_mode = size_mode
 
 	# Unwrap the bits/bytes mode change construct.core.Restreamed subcon
@@ -197,7 +197,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.size_mode = SizeMode.BITS
 		elif obj.decoder == construct.bits2bytes:
 			self.size_mode = SizeMode.BYTES
-		self._recuse(obj, indent = False)
+		self._recurse(obj, indent = False)
 		self.size_mode = size_mode
 
 	def _numeric_handler(self, obj : Union[construct.BitsInteger,construct.BytesInteger]):
@@ -249,7 +249,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append(f'.. py:attribute:: {self.name}.{k}')
 			self.append(f'   :type: {self._typename(v)}')
 			self.append( '   :noindex:')
-			self._recuse(v)
+			self._recurse(v)
 
 		if hasattr(obj, 'docs'):
 			self.append()
@@ -257,19 +257,19 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		_documented_subcon_instances[obj] = self.name
 
 	def _struct_handler(self, obj : construct.Struct):
-		self._recuse(obj, indent = False)
+		self._recurse(obj, indent = False)
 
 		if hasattr(obj, 'docs'):
 			self.append()
 			self.append(obj.docs)
 
 	def _const_handler(self, obj : construct.Const):
-		self._recuse(obj, indent = False)
+		self._recurse(obj, indent = False)
 
 	def _padded_handler(self, obj : construct.Padded):
 		self.append()
 		self.append(f'Data block padded to {obj.length} bytes')
-		self._recuse(obj)
+		self._recurse(obj)
 		if hasattr(obj, 'docs'):
 			self.append()
 			self.append(obj.docs)
@@ -277,7 +277,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 	def _rebuild_handler(self, obj : construct.Rebuild):
 		self.append()
 		self.append(f'Runtime rebuilt constant')
-		self._recuse(obj, indent = False)
+		self._recurse(obj, indent = False)
 		if hasattr(obj, 'docs'):
 			self.append()
 			self.append(obj.docs)
@@ -286,7 +286,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self.append()
 		self.append(f'.. py:attribute:: {self.name}.GreedyRange')
 		self.append(f'   :type: {self._typename(obj.subcon)}')
-		self._recuse(obj)
+		self._recurse(obj)
 
 	# The default handler for things we miss
 	def _default_handler(self, obj):
@@ -295,7 +295,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			self.append()
 			self.append(obj.docs)
 
-		self._recuse(obj)
+		self._recurse(obj)
 
 	# Not quite the default handler, but an empty handler
 	# for type that don't have special parsing needs
@@ -323,7 +323,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		if isinstance(self.object, construct.Switch):
 			self._switch_handler(self.object, header = False)
 		else:
-			self._recuse(self.object, indent = False)
+			self._recurse(self.object, indent = False)
 		self.name = name
 
 	def get_doc(self, ignore: int = None):
