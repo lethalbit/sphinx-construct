@@ -244,6 +244,10 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 			key = _recompose_keyfunc(obj.keyfunc)
 			self.append(f':value: {key}')
 
+		if obj in _documented_subcon_instances:
+			self._recurse(obj, indent = False)
+			return
+
 		for k, v in obj.cases.items():
 			self.append()
 			self.append(f'.. py:attribute:: {self.name}.{k}')
