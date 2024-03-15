@@ -35,7 +35,7 @@ setup(
 	author_email    = 'nya@catgirl.link',
 	description     = 'A sphinx extension to generate good-looking documentation from Construct objects',
 	license         = 'BSD-3-Clause',
-	python_requires = '~=3.7',
+	python_requires = '~=3.10',
 	zip_safe        = False,
 
 	setup_requires  = [
@@ -46,7 +46,7 @@ setup(
 
 	install_requires = [
 		'Jinja2',
-		'construct>=2.10.67',
+		'construct>=2.10.70',
 		'executing'
 	],
 
