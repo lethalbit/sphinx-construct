@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 from sphinx.util        import logging
-from sphinx.ext.autodoc import ModuleLevelDocumenter
+from sphinx.ext.autodoc import ModuleDocumenter
 from enum               import IntEnum, unique, auto
 from typing             import Union
 import construct
@@ -24,12 +24,12 @@ class SizeMode(IntEnum):
 	BYTES = auto()
 	BITS = auto()
 
-class SubconstructDocumenter(ModuleLevelDocumenter):
+class SubconstructDocumenter(ModuleDocumenter):
 	# domain         = DOMAIN
 	objtype          = 'subconstruct'
 	directivetype    = 'attribute'
-	priority         = ModuleLevelDocumenter.priority + 100
-	option_spec      = dict(ModuleLevelDocumenter.option_spec)
+	priority         = ModuleDocumenter.priority + 100
+	option_spec      = dict(ModuleDocumenter.option_spec)
 	titles_allowed   = True
 
 	def __init__(self, *args, **kwargs):
@@ -200,7 +200,7 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		self._recurse(obj, indent = False)
 		self.size_mode = size_mode
 
-	def _numeric_handler(self, obj : Union[construct.BitsInteger,construct.BytesInteger]):
+	def _numeric_handler(self, obj : Union[construct.BitsInteger, construct.BytesInteger]):
 		signedness = 'Signed' if obj.signed else 'Unsigned'
 		if isinstance(obj, construct.BitsInteger):
 			unit = 'bit'
@@ -320,8 +320,8 @@ class SubconstructDocumenter(ModuleLevelDocumenter):
 		if isinstance(self.object, construct.Switch):
 			self.append(f'   :value: {self.object.keyfunc}')
 
-	def add_content(self, content, no_docstring = False):
-		super().add_content(content, no_docstring)
+	def add_content(self, content):
+		super().add_content(content)
 		name = self.name
 		self.name = f'{self.modname}.{self.format_name()}'
 		if isinstance(self.object, construct.Switch):

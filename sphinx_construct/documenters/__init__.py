@@ -8,8 +8,6 @@ __all__ = (
 
 def register_documenters(app = None):
 	if app is None:
-		raise ValueError(f'Application must be set')
+		raise ValueError('Application must be set')
 
 	app.add_autodocumenter(SubconstructDocumenter)
-
-
